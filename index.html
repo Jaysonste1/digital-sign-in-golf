@@ -94,21 +94,29 @@ async function apiList() {
 async function apiToggle(name) {
   const res = await fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action:'toggle', event:EVENT_ID, name, token:TOKEN })
+    
+    body: JSON.stringify({ action:'toggle', event: EVENT_ID, name, token: TOKEN })
   });
-  const data = await res.json();
-  if (!data.ok) throw new Error(data.error || 'Toggle failed');
+  
+  let ok = true;
+  try {
+    const data = await res.json();
+    ok = data.ok !== false;
+  } catch (_) {}
+  if (!ok) throw new Error('Toggle failed');
 }
 
 async function apiSeed() {
   const res = await fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action:'seed', event:EVENT_ID, rows: INITIAL, token: TOKEN })
+    body: JSON.stringify({ action:'seed', event: EVENT_ID, rows: INITIAL, token: TOKEN })
   });
-  const data = await res.json();
-  if (!data.ok) throw new Error(data.error || 'Seed failed');
+  let ok = true;
+  try {
+    const data = await res.json();
+    ok = data.ok !== false;
+  } catch (_) {}
+  if (!ok) throw new Error('Seed failed');
 }
 
 // ===== Data + render =====
