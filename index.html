@@ -80,16 +80,22 @@ let query = "";            // search string
 let pollingHandle = null;
 
 // ===== API helpers =====
-async function apiList() {
+async function apiToggle(name) {
   const url = new URL(API_URL);
-  url.searchParams.set('action','list');
+  url.searchParams.set('action', 'toggle');
   url.searchParams.set('event', EVENT_ID);
+  url.searchParams.set('name', name);
   url.searchParams.set('token', TOKEN);
-  const res = await fetch(url, { method:'GET', cache:'no-store' });
-  const data = await res.json();
-  if (data && !data.error && Array.isArray(data)) return data;
-  throw new Error(data && data.error || 'List failed');
+  const res = await fetch(url, { method: 'GET', cache: 'no-store' });
+  // Try to parse JSON; if it’s opaque, assume OK
+  let ok = true;
+  try {
+    const data = await res.json();
+    ok = data.ok !== false;
+  } catch (_) {}
+  if (!ok) throw new Error('Toggle failed');
 }
+
 
 async function apiToggle(name) {
   const res = await fetch(API_URL, {
@@ -209,15 +215,7 @@ async function refresh() {
   }
 }
 
-async function ensureSeeded() {
-  try {
-    const data = await apiList();
-    if (!Array.isArray(data) || data.length === 0) {
-      await apiSeed();
-    }
-  } catch (e) {
-    console.warn('Seed check failed', e);
-  }
+async function ensureSeeded() {/* no-op: data already in Sheet */
 }
 
 // Wire up controls
